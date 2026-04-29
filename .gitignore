@@ -1,0 +1,48 @@
+﻿## --- .NET / C# ---
+# Dossiers de sortie de compilation (binaires)
+[Bb]in/
+[Oo]bj/
+
+# Fichiers de log de restauration de MSBuild
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## --- IDE & Éditeurs ---
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+## --- Publication & Packaging ---
+# Fichiers générés lors du 'dotnet publish'
+publish/
+
+# Packages NuGet
+*.nupkg
+# Dossier de packages si vous utilisez un dossier local (rarement versionné)
+packages/
+
+## --- Fichiers système & temporaires ---
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+## --- Spécifique à votre projet EPUB ---
+# On ignore le fichier de sortie généré par vos tests
+epub/
