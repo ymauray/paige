@@ -19,8 +19,19 @@ rootCommand.SetAction((ParseResult result) =>
     string rootPath = result.GetValue(rootOption) ?? "epub";
 
     Console.WriteLine($"Dossier racine : {rootPath}");
-    var epub = new Epub();
     string fullPath = Path.GetFullPath(rootPath);
+
+    string coverFullPath = Path.Combine(fullPath, "cover.jpg");
+    if (!File.Exists(coverFullPath))
+    {
+        Console.WriteLine("Le fichier cover.jpg est manquant dans le dossier racine.");
+        return;
+    }
+
+    var epub = new Epub()
+    {
+        CoverFullPath = coverFullPath
+    };
 
     if (!Directory.Exists(fullPath) )
     {
