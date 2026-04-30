@@ -37,8 +37,7 @@ rootCommand.SetAction((ParseResult result) =>
     {
         Directory.CreateDirectory(fullPath);
     }
-    fullPath = Path.Combine(fullPath, "mybook.epub");
-    epub.Write(fullPath);
+    epub.Write(fullPath, "mybook.epub");
 });
 
 // 4. Exécution (Plus besoin de InvokeAsync, Invoke suffit ou InvokeAsync si besoin)

@@ -6,10 +6,21 @@ namespace Paige
     {
         public required string CoverFullPath { get; init; }
 
-        public void Write(string filename)
+        private void CopyFile(ZipArchive output, string entryName, string sourcePath)
         {
-            using var outputStream = new FileStream(filename, FileMode.Create);
+            var coverEntry = output.CreateEntry(entryName);
+            using var entryStream = coverEntry.Open();
+            using var sourceStream = File.OpenRead(sourcePath);
+            sourceStream.CopyTo(entryStream);
+        }
+
+        public void Write(string basePath, string filename)
+        {
+            string fullPath = Path.Combine(basePath, filename);
+            using var outputStream = new FileStream(fullPath, FileMode.Create);
             using var output = new ZipArchive(outputStream, ZipArchiveMode.Create);
+
+            var titlePageTemplate = Path.Combine(basePath, "title-page.xhtml");
 
             // 1. Le fichier 'mimetype' - DOIT être le premier et NON COMPRESSÉ
             // Note: ZipArchive ne permet pas facilement de forcer le "Store" (0% compression)
@@ -39,7 +50,7 @@ namespace Paige
             var opfEntry = output.CreateEntry("OEBPS/content.opf");
             using (var writer = new StreamWriter(opfEntry.Open()))
             {
-                writer.Write("""
+                writer.WriteLine("""
             <?xml version="1.0" encoding="UTF-8"?>
             <package xmlns="http://www.idpf.org/2007/opf" unique-identifier="pub-id" version="3.0">
                 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -52,10 +63,26 @@ namespace Paige
                     <item id="cover-img" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>
                     <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>
                     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+            """);
+                if (File.Exists(titlePageTemplate))
+                {
+                    writer.WriteLine($"""
+                    <item id="title-page" href="title-page.xhtml" media-type="application/xhtml+xml"/>
+                    """);
+                }
+                writer.WriteLine("""
                     <item id="chap1" href="chapitre1.xhtml" media-type="application/xhtml+xml"/>
                 </manifest>
                 <spine>
                     <itemref idref="cover-page"/>
+            """);
+                if (File.Exists(titlePageTemplate))
+                {
+                    writer.WriteLine("""
+                    <itemref idref="title-page"/>
+                    """);
+                }
+                writer.WriteLine("""
                     <itemref idref="chap1"/>
                 </spine>
             </package>
@@ -81,6 +108,11 @@ namespace Paige
             </body>
             </html>
             """);
+            }
+
+            if (File.Exists(titlePageTemplate))
+            {
+                CopyFile(output, "OEBPS/title-page.xhtml", titlePageTemplate);
             }
 
             // 4. Un chapitre minimal (XHTML obligatoire, pas de HTML simple)
@@ -123,12 +155,7 @@ namespace Paige
         """);
             }
 
-            var coverEntry = output.CreateEntry("OEBPS/cover.jpg");
-            using (var entryStream = coverEntry.Open())
-            {
-                using var sourceStream = File.OpenRead(CoverFullPath);
-                sourceStream.CopyTo(entryStream);
-            }
+            CopyFile(output, "OEBPS/cover.jpg", CoverFullPath);
         }
     }
 }
