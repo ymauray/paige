@@ -38,6 +38,9 @@ publish/
 # Dossier de packages si vous utilisez un dossier local (rarement versionné)
 packages/
 
+# Claude
+.claude/
+
 ## --- Fichiers système & temporaires ---
 .DS_Store
 Thumbs.db
