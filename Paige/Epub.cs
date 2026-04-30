@@ -1,42 +1,38 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 
-namespace Paige
+namespace Paige;
+
+public static class Epub
 {
-    public class Epub()
+    public static void Write(EpubDocument doc, string basePath, string filename)
     {
-        public required string CoverFullPath { get; init; }
+        var outputPath = Path.Combine(basePath, filename);
+        using var stream = new FileStream(outputPath, FileMode.Create);
+        using var zip = new ZipArchive(stream, ZipArchiveMode.Create);
 
-        private void CopyFile(ZipArchive output, string entryName, string sourcePath)
-        {
-            var coverEntry = output.CreateEntry(entryName);
-            using var entryStream = coverEntry.Open();
-            using var sourceStream = File.OpenRead(sourcePath);
-            sourceStream.CopyTo(entryStream);
-        }
+        var coverItem  = doc.Manifest.FirstOrDefault(i => i.Properties == "cover-image");
+        var spineItems = doc.Manifest.Where(i => i.InSpine).ToList();
 
-        public void Write(string basePath, string filename)
-        {
-            string fullPath = Path.Combine(basePath, filename);
-            using var outputStream = new FileStream(fullPath, FileMode.Create);
-            using var output = new ZipArchive(outputStream, ZipArchiveMode.Create);
+        WriteMimetype(zip);
+        WriteContainerXml(zip);
+        WriteContentOpf(zip, doc, coverItem, spineItems);
+        if (coverItem != null) WriteCoverXhtml(zip, coverItem);
+        foreach (var item in doc.Manifest) WriteItem(zip, item, basePath);
+        WriteNavXhtml(zip, spineItems);
+    }
 
-            var titlePageTemplate = Path.Combine(basePath, "title-page.xhtml");
+    private static void WriteMimetype(ZipArchive zip)
+    {
+        var entry = zip.CreateEntry("mimetype", CompressionLevel.NoCompression);
+        using var w = new StreamWriter(entry.Open());
+        w.Write("application/epub+zip");
+    }
 
-            // 1. Le fichier 'mimetype' - DOIT être le premier et NON COMPRESSÉ
-            // Note: ZipArchive ne permet pas facilement de forcer le "Store" (0% compression)
-            // via l'API simple, mais pour un test, créons-le normalement :
-            var mimetypeEntry = output.CreateEntry("mimetype", CompressionLevel.NoCompression);
-            using (var writer = new StreamWriter(mimetypeEntry.Open()))
-            {
-                writer.Write("application/epub+zip");
-            }
-
-            // 2. Le dossier META-INF et le fichier container.xml
-            // Il indique à la liseuse où se trouve le fichier de description (OPF)
-            var containerEntry = output.CreateEntry("META-INF/container.xml");
-            using (var writer = new StreamWriter(containerEntry.Open()))
-            {
-                writer.Write("""
+    private static void WriteContainerXml(ZipArchive zip)
+    {
+        var entry = zip.CreateEntry("META-INF/container.xml");
+        using var w = new StreamWriter(entry.Open());
+        w.Write("""
             <?xml version="1.0" encoding="UTF-8"?>
             <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
                 <rootfiles>
@@ -44,55 +40,55 @@ namespace Paige
                 </rootfiles>
             </container>
             """);
-            }
+    }
 
-            // 3. Le fichier de contenu OPF (le cerveau de l'EPUB)
-            var opfEntry = output.CreateEntry("OEBPS/content.opf");
-            using (var writer = new StreamWriter(opfEntry.Open()))
-            {
-                writer.WriteLine("""
+    private static void WriteContentOpf(ZipArchive zip, EpubDocument doc, ManifestItem? coverItem, IList<ManifestItem> spineItems)
+    {
+        var entry = zip.CreateEntry("OEBPS/content.opf");
+        using var w = new StreamWriter(entry.Open());
+        var modified = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+        w.WriteLine($"""
             <?xml version="1.0" encoding="UTF-8"?>
             <package xmlns="http://www.idpf.org/2007/opf" unique-identifier="pub-id" version="3.0">
                 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-                    <dc:identifier id="pub-id">12345</dc:identifier>
-                    <dc:title>Mon Livre Paige</dc:title>
-                    <dc:language>fr</dc:language>
-                    <meta property="dcterms:modified">2024-05-22T12:00:00Z</meta>
+                    <dc:identifier id="pub-id">{doc.Metadata.Identifier}</dc:identifier>
+                    <dc:title>{doc.Metadata.Title}</dc:title>
+                    <dc:language>{doc.Metadata.Language}</dc:language>
+                    <meta property="dcterms:modified">{modified}</meta>
                 </metadata>
                 <manifest>
-                    <item id="cover-img" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>
-                    <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>
-                    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
             """);
-                if (File.Exists(titlePageTemplate))
-                {
-                    writer.WriteLine($"""
-                    <item id="title-page" href="title-page.xhtml" media-type="application/xhtml+xml"/>
-                    """);
-                }
-                writer.WriteLine("""
-                    <item id="chap1" href="chapitre1.xhtml" media-type="application/xhtml+xml"/>
-                </manifest>
-                <spine>
-                    <itemref idref="cover-page"/>
-            """);
-                if (File.Exists(titlePageTemplate))
-                {
-                    writer.WriteLine("""
-                    <itemref idref="title-page"/>
-                    """);
-                }
-                writer.WriteLine("""
-                    <itemref idref="chap1"/>
-                </spine>
-            </package>
-            """);
-            }
 
-            var coverPageEntry = output.CreateEntry("OEBPS/cover.xhtml");
-            using (var writer = new StreamWriter(coverPageEntry.Open()))
-            {
-               writer.Write("""
+        if (coverItem != null)
+            w.WriteLine("""        <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>""");
+
+        w.WriteLine("""        <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>""");
+
+        foreach (var item in doc.Manifest)
+        {
+            var props = item.Properties != null ? $""" properties="{item.Properties}" """ : "";
+            w.WriteLine($"""        <item id="{item.Id}" href="{item.Href}" media-type="{item.MediaType}"{props}/>""");
+        }
+
+        w.WriteLine("    </manifest>");
+        w.WriteLine("    <spine>");
+
+        if (coverItem != null)
+            w.WriteLine("""        <itemref idref="cover-page"/>""");
+
+        foreach (var item in spineItems)
+            w.WriteLine($"""        <itemref idref="{item.Id}"/>""");
+
+        w.WriteLine("    </spine>");
+        w.Write("</package>");
+    }
+
+    private static void WriteCoverXhtml(ZipArchive zip, ManifestItem coverItem)
+    {
+        var entry = zip.CreateEntry("OEBPS/cover.xhtml");
+        using var w = new StreamWriter(entry.Open());
+        w.Write($$"""
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE html>
             <html xmlns="http://www.w3.org/1999/xhtml">
@@ -104,58 +100,67 @@ namespace Paige
                 </style>
             </head>
             <body>
-                <img src="cover.jpg" alt="Couverture" />
+                <img src="{{coverItem.Href}}" alt="Couverture" />
             </body>
             </html>
             """);
-            }
+    }
 
-            if (File.Exists(titlePageTemplate))
-            {
-                CopyFile(output, "OEBPS/title-page.xhtml", titlePageTemplate);
-            }
-
-            // 4. Un chapitre minimal (XHTML obligatoire, pas de HTML simple)
-            var chapterEntry = output.CreateEntry("OEBPS/chapitre1.xhtml");
-            using (var writer = new StreamWriter(chapterEntry.Open()))
-            {
-                writer.Write("""
+    private static void WriteNavXhtml(ZipArchive zip, IList<ManifestItem> spineItems)
+    {
+        var entry = zip.CreateEntry("OEBPS/nav.xhtml");
+        using var w = new StreamWriter(entry.Open());
+        w.WriteLine("""
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE html>
-            <html xmlns="http://www.w3.org/1999/xhtml">
-            <head><title>Chapitre 1</title></head>
+            <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+            <head><title>Table des matières</title></head>
             <body>
-                <h1>Hello .NET 10</h1>
-                <p>Ceci est un EPUB généré manuellement.</p>
+                <nav epub:type="toc" id="toc">
+                    <h1>Sommaire</h1>
+                    <ol>
+            """);
+
+        foreach (var item in spineItems)
+            w.WriteLine($"""            <li><a href="{item.Href}">{item.Id}</a></li>""");
+
+        w.Write("""
+                    </ol>
+                </nav>
             </body>
             </html>
             """);
-            }
+    }
 
-            // 5. Le fichier de navigation (nav.xhtml) pour EPUB 3
-            var navEntry = output.CreateEntry("OEBPS/nav.xhtml");
-            using (var writer = new StreamWriter(navEntry.Open()))
-            {
-                writer.Write("""
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE html>
-        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
-        <head>
-            <title>Table des matières</title>
-        </head>
-        <body>
-            <nav epub:type="toc" id="toc">
-                <h1>Sommaire</h1>
-                <ol>
-                    <li><a href="chapitre1.xhtml">Premier Chapitre</a></li>
-                </ol>
-            </nav>
-        </body>
-        </html>
-        """);
-            }
-
-            CopyFile(output, "OEBPS/cover.jpg", CoverFullPath);
+    private static void WriteItem(ZipArchive zip, ManifestItem item, string basePath)
+    {
+        if (item.InlineContent != null)
+        {
+            var entry = zip.CreateEntry($"OEBPS/{item.Href}");
+            using var w = new StreamWriter(entry.Open());
+            w.Write($"""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE html>
+                <html xmlns="http://www.w3.org/1999/xhtml">
+                {item.InlineContent}
+                </html>
+                """);
         }
+        else if (item.Source != null)
+        {
+            CopyFile(zip, $"OEBPS/{item.Href}", Path.Combine(basePath, item.Source));
+        }
+        else
+        {
+            throw new InvalidOperationException($"L'item '{item.Id}' n'a ni Source ni InlineContent.");
+        }
+    }
+
+    private static void CopyFile(ZipArchive zip, string entryName, string sourcePath)
+    {
+        var entry = zip.CreateEntry(entryName);
+        using var entryStream = entry.Open();
+        using var sourceStream = File.OpenRead(sourcePath);
+        sourceStream.CopyTo(entryStream);
     }
 }

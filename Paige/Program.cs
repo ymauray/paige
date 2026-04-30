@@ -1,44 +1,32 @@
-﻿using Paige;
+using Paige;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 
-// 1. Définition de l'option (Le constructeur utilise souvent l'alias direct)
 var rootOption = new Option<string>("--project-root")
 {
     Description = "Le dossier racine du projet EPUB.",
 };
 
-// 2. Création de la commande racine
 var rootCommand = new RootCommand("Paige : Générateur d'EPUB");
 rootCommand.Options.Add(rootOption);
 
-// 3. Définition de l'action
 rootCommand.SetAction((ParseResult result) =>
 {
-    // On récupère la valeur via le ParseResult
-    string rootPath = result.GetValue(rootOption) ?? "epub";
-
-    Console.WriteLine($"Dossier racine : {rootPath}");
+    string rootPath = result.GetValue(rootOption) ?? ".";
     string fullPath = Path.GetFullPath(rootPath);
 
-    string coverFullPath = Path.Combine(fullPath, "cover.jpg");
-    if (!File.Exists(coverFullPath))
+    var paigeFiles = Directory.GetFiles(fullPath, "*.paige");
+    if (paigeFiles.Length == 0)
     {
-        Console.WriteLine("Le fichier cover.jpg est manquant dans le dossier racine.");
+        Console.WriteLine("Aucun fichier .paige trouvé dans le dossier racine.");
         return;
     }
 
-    var epub = new Epub()
-    {
-        CoverFullPath = coverFullPath
-    };
+    var source = File.ReadAllText(paigeFiles[0]);
+    var doc = Parser.Parse(source);
 
-    if (!Directory.Exists(fullPath) )
-    {
-        Directory.CreateDirectory(fullPath);
-    }
-    epub.Write(fullPath, "mybook.epub");
+    Epub.Write(doc, fullPath, "mybook.epub");
+    Console.WriteLine($"EPUB généré : {Path.Combine(fullPath, "mybook.epub")}");
 });
 
-// 4. Exécution (Plus besoin de InvokeAsync, Invoke suffit ou InvokeAsync si besoin)
 return rootCommand.Parse(args).Invoke();
