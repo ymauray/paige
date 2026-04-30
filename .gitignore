@@ -50,3 +50,5 @@ Thumbs.db
 ## --- Spécifique à votre projet EPUB ---
 # On ignore le fichier de sortie généré par vos tests
 epub/
+
+*.epub
