@@ -2,6 +2,7 @@
 # Dossiers de sortie de compilation (binaires)
 [Bb]in/
 [Oo]bj/
+**/*.lscache
 
 # Fichiers de log de restauration de MSBuild
 project.lock.json
