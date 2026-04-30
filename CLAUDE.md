@@ -26,8 +26,12 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 
 ### Current state
 
-- **`Epub.cs`** — the only non-trivial class. It builds an EPUB 3 ZIP archive directly using `System.IO.Compression.ZipArchive`. All content (metadata, chapters, nav) is currently hardcoded here.
-- **`Program.cs`** — thin CLI wrapper using `System.CommandLine`. Reads `--project-root`, checks for `cover.jpg`, then delegates to `Epub.Write()`.
+- **`Token.cs`** — `TokenType` enum and `record Token(Type, Value, Line)`.
+- **`Lexer.cs`** — `Lexer.Tokenize(string)` → `Token[]`. Handles all `.paige` token types.
+- **`Est.cs`** — EST records: `EpubDocument`, `EpubMetadata`, `ManifestItem`.
+- **`Parser.cs`** — `Parser.Parse(string)` → `EpubDocument`. Recursive descent, calls the Lexer internally.
+- **`Epub.cs`** — builds an EPUB 3 ZIP archive using `System.IO.Compression.ZipArchive`. Content is still hardcoded; pending update to accept an `EpubDocument`.
+- **`Program.cs`** — thin CLI wrapper using `System.CommandLine`. Pending update to read the `.paige` file and drive the full pipeline.
 
 ### The `.paige` DSL
 
@@ -42,7 +46,7 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 ]
 ```
 
-**The DSL parser does not exist yet.** Implementing it — so that `Epub` is driven by a parsed `.paige` file instead of hardcoded values — is the main pending work.
+See `SPECS.md` for the full grammar and EST definition.
 
 ### EPUB structure produced
 

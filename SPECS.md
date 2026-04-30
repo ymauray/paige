@@ -28,7 +28,7 @@ Deux directives pour l'instant :
 #metadata(
     identifier: <int>,
     title: <string>,
-    language: <ident>
+    language: fr | en
 )
 ```
 
@@ -90,9 +90,19 @@ La nav est **générée automatiquement** par `Epub.Write()` à partir de la lis
 
 **TDD strict** : les tests sont écrits avant toute implémentation. Aucune fonction n'est intégrée dans le projet avant d'avoir des tests qui passent. L'ordre systématique pour chaque composant : tests rouges → implémentation → tests verts → intégration.
 
-## Ce qui reste à implémenter
+## État d'avancement
 
-1. **Lexer** (`Lexer.cs`) — tokenise le source `.paige` en `Token[]`.
-2. **Parser** (`Parser.cs`) — construit un `EpubDocument` à partir des tokens.
-3. **Mise à jour de `Epub.Write()`** — accepter un `EpubDocument` en paramètre et supprimer tout le contenu hardcodé.
-4. **Mise à jour de `Program.cs`** — lire le fichier `.paige` du dossier racine, le parser, passer l'EST à `Epub`.
+| Composant | Fichier | État |
+|---|---|---|
+| Tokens | `Paige/Token.cs` | Fait — `TokenType` enum + `record Token` |
+| Lexer | `Paige/Lexer.cs` | Fait — `Lexer.Tokenize(string)` → `Token[]` |
+| EST | `Paige/Est.cs` | Fait — `EpubDocument`, `EpubMetadata`, `ManifestItem` |
+| Parser | `Paige/Parser.cs` | Fait — `Parser.Parse(string)` → `EpubDocument` |
+| `Epub.Write()` | `Paige/Epub.cs` | **À faire** — accepter un `EpubDocument`, supprimer le contenu hardcodé |
+| `Program.cs` | `Paige/Program.cs` | **À faire** — lire le `.paige`, parser, passer l'EST à `Epub` |
+
+### Tests
+
+- `Paige.Tests/LexerTests.cs` — 19 tests (tous verts)
+- `Paige.Tests/ParserTests.cs` — 22 tests (tous verts)
+- `Paige.Tests/Fixtures/sample.paige` — fixture figée utilisée par les tests d'intégration
