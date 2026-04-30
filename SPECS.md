@@ -98,11 +98,26 @@ La nav est **générée automatiquement** par `Epub.Write()` à partir de la lis
 | Lexer | `Paige/Lexer.cs` | Fait — `Lexer.Tokenize(string)` → `Token[]` |
 | EST | `Paige/Est.cs` | Fait — `EpubDocument`, `EpubMetadata`, `ManifestItem` |
 | Parser | `Paige/Parser.cs` | Fait — `Parser.Parse(string)` → `EpubDocument` |
-| `Epub.Write()` | `Paige/Epub.cs` | **À faire** — accepter un `EpubDocument`, supprimer le contenu hardcodé |
-| `Program.cs` | `Paige/Program.cs` | **À faire** — lire le `.paige`, parser, passer l'EST à `Epub` |
+| `Epub.Write()` | `Paige/Epub.cs` | Fait — `static Epub.Write(EpubDocument, basePath, filename)` |
+| `Program.cs` | `Paige/Program.cs` | Fait — lit le `.paige`, parse, appelle `Epub.Write()` |
+
+Le pipeline est complet de bout en bout : `.paige` → Lexer → Parser → EST → `Epub.Write()` → `.epub`.
+
+### Responsabilités de `Epub.Write()`
+
+| Entrée ZIP | Source |
+|---|---|
+| `mimetype` | Auto-généré (non compressé, premier) |
+| `META-INF/container.xml` | Auto-généré |
+| `OEBPS/content.opf` | Généré depuis `EpubMetadata` + `Manifest` |
+| `OEBPS/cover.xhtml` | Auto-généré si un item a `properties: "cover-image"` |
+| `OEBPS/{href}` (Source) | Copie du fichier `source` depuis le dossier racine |
+| `OEBPS/{href}` (InlineContent) | `InlineContent` enveloppé dans un document XHTML complet |
+| `OEBPS/nav.xhtml` | Auto-généré depuis les items `InSpine == true` |
 
 ### Tests
 
 - `Paige.Tests/LexerTests.cs` — 19 tests (tous verts)
 - `Paige.Tests/ParserTests.cs` — 22 tests (tous verts)
+- `Paige.Tests/EpubWriterTests.cs` — 15 tests (tous verts)
 - `Paige.Tests/Fixtures/sample.paige` — fixture figée utilisée par les tests d'intégration

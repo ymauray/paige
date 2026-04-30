@@ -18,7 +18,7 @@ dotnet test Paige.Tests/Paige.Tests.csproj
 dotnet publish Paige/Paige.csproj
 ```
 
-The `<dossier>` must contain at least a `cover.jpg`. Optionally a `title-page.xhtml`.
+The `<dossier>` must contain a `.paige` file. Defaults to the current directory if omitted.
 
 ## Architecture
 
@@ -30,8 +30,8 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 - **`Lexer.cs`** — `Lexer.Tokenize(string)` → `Token[]`. Handles all `.paige` token types.
 - **`Est.cs`** — EST records: `EpubDocument`, `EpubMetadata`, `ManifestItem`.
 - **`Parser.cs`** — `Parser.Parse(string)` → `EpubDocument`. Recursive descent, calls the Lexer internally.
-- **`Epub.cs`** — builds an EPUB 3 ZIP archive using `System.IO.Compression.ZipArchive`. Content is still hardcoded; pending update to accept an `EpubDocument`.
-- **`Program.cs`** — thin CLI wrapper using `System.CommandLine`. Pending update to read the `.paige` file and drive the full pipeline.
+- **`Epub.cs`** — `static Epub.Write(EpubDocument, basePath, filename)`. Builds an EPUB 3 ZIP archive driven by the EST. Auto-generates `cover.xhtml` (if a `cover-image` item exists) and `nav.xhtml` from spine items.
+- **`Program.cs`** — CLI wrapper using `System.CommandLine`. Finds the `.paige` file in `--project-root`, parses it, calls `Epub.Write()`.
 
 ### The `.paige` DSL
 
@@ -53,10 +53,8 @@ See `SPECS.md` for the full grammar and EST definition.
 ```
 mimetype                      (uncompressed, always first)
 META-INF/container.xml
-OEBPS/content.opf             (manifest + spine)
-OEBPS/cover.xhtml
-OEBPS/cover.jpg
-OEBPS/title-page.xhtml        (optional, copied verbatim if present)
-OEBPS/chapitre1.xhtml
-OEBPS/nav.xhtml
+OEBPS/content.opf             (manifest + spine, generated from EST)
+OEBPS/cover.xhtml             (auto-generated if a cover-image item exists)
+OEBPS/{href}…                 (one entry per manifest item)
+OEBPS/nav.xhtml               (auto-generated from spine items)
 ```
