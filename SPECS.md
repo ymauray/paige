@@ -108,8 +108,8 @@ La nav est **générée automatiquement** par `Epub.Write()` à partir de la lis
 | Lexer | `Paige/Lexer.cs` | Fait — `Lexer.Tokenize(string)` → `Token[]` |
 | EST | `Paige/Est.cs` | Fait — `EpubDocument`, `EpubMetadata`, `ManifestItem` |
 | Parser | `Paige/Parser.cs` | Fait — `Parser.Parse(string)` → `EpubDocument` |
-| `Epub.Write()` | `Paige/Epub.cs` | Fait — `static Epub.Write(EpubDocument, basePath, filename)` |
-| `Program.cs` | `Paige/Program.cs` | Fait — lit le `.paige`, parse, appelle `Epub.Write()` |
+| `Epub.Write()` | `Paige/Epub.cs` | Fait — `static Epub.Write(EpubDocument, basePath, outputPath)` |
+| `Program.cs` | `Paige/Program.cs` | Fait — lit le `.paige`, parse, appelle `Epub.Write()` avec support de `--output` |
 
 Le pipeline est complet de bout en bout : `.paige` → Lexer → Parser → EST → `Epub.Write()` → `.epub`.
 

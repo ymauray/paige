@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 dotnet build Paige/Paige.csproj
 
 # Run (generate an EPUB from a project folder)
-dotnet run --project Paige -- --project-root <dossier>
+dotnet run --project Paige -- --project-root <dossier> [--output <path.epub>]
 
 # Tests
 dotnet test Paige.Tests/Paige.Tests.csproj
@@ -30,8 +30,8 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 - **`Lexer.cs`** — `Lexer.Tokenize(string)` → `Token[]`. Handles all `.paige` token types.
 - **`Est.cs`** — EST records: `EpubDocument`, `EpubMetadata`, `ManifestItem`.
 - **`Parser.cs`** — `Parser.Parse(string, basePath)` → `EpubDocument`. Recursive descent, supports `#include` and relative path resolution.
-- **`Epub.cs`** — `static Epub.Write(EpubDocument, basePath, filename)`. Builds an EPUB 3 ZIP archive driven by the EST. Auto-generates `cover.xhtml` (if a `cover-image` item exists) and `nav.xhtml` from spine items.
-- **`Program.cs`** — CLI wrapper using `System.CommandLine`. Finds the `.paige` file in `--project-root`, parses it, calls `Epub.Write()`. Gère proprement les erreurs d'entrée/sortie (dossiers ou fichiers manquants).
+- **`Epub.cs`** — `static Epub.Write(EpubDocument, basePath, outputPath)`. Builds an EPUB 3 ZIP archive driven by the EST. Auto-generates `cover.xhtml` (if a `cover-image` item exists) and `nav.xhtml` from spine items.
+- **`Program.cs`** — CLI wrapper using `System.CommandLine`. Finds the `.paige` file in `--project-root`, parses it, calls `Epub.Write()`. Gère proprement les erreurs d'entrée/sortie et supporte l'option `--output`.
 
 ### The `.paige` DSL
 
