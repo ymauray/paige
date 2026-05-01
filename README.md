@@ -26,16 +26,38 @@
 
 ## 🛠️ Installation
 
+### Via les gestionnaires de paquets
+
+**macOS / Linux (Homebrew)** :
+```bash
+brew install ymauray/tap/paige
+```
+
+**Windows (Scoop)** :
+```powershell
+scoop bucket add scoop-bucket https://github.com/ymauray/scoop-bucket.git
+scoop install paige
+```
+
+**Linux (.deb / .rpm)** :
+Téléchargez les paquets depuis les [Releases GitHub](https://github.com/ymauray/paige/releases) et installez-les via votre gestionnaire habituel :
+```bash
+# Pour Debian/Ubuntu
+sudo apt install ./paige-linux-x64.deb
+
+# Pour Fedora/RHEL
+sudo dnf install ./paige-linux-x64.rpm
+```
+
+### Depuis les sources
+
 ```bash
 # Cloner le dépôt
-git clone https://github.com/votre-nom/paige.git
+git clone https://github.com/ymauray/paige.git
 cd paige
 
 # Compiler le projet
 dotnet build Paige/Paige.csproj
-
-# (Optionnel) Installer comme outil global (bientôt disponible)
-# dotnet tool install --global Paige
 ```
 
 ---
