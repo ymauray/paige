@@ -79,6 +79,16 @@ public class ParserTests
     }
 
     [Fact]
+    public void ManifestAdd_Nav_IsParsed()
+    {
+        var doc = Parser.Parse("""
+            #metadata(identifier: 1, title: "T", language: fr)
+            #manifest.add(id: "x", href: "x.xhtml", mediaType: "application/xhtml+xml", nav: "Label")
+            """);
+        Assert.Equal("Label", doc.Manifest[0].Nav);
+    }
+
+    [Fact]
     public void ManifestAdd_InSpine_DefaultsFalse()
     {
         var doc = Parser.Parse("""
@@ -202,11 +212,11 @@ public class ParserTests
     }
 
     [Fact]
-    public void SampleFixture_Manifest_HasTwoItems()
+    public void SampleFixture_Manifest_HasThreeItems()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
         var doc = Parser.Parse(source);
-        Assert.Equal(2, doc.Manifest.Count);
+        Assert.Equal(3, doc.Manifest.Count);
     }
 
     [Fact]

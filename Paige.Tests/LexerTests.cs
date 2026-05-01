@@ -150,12 +150,12 @@ public class LexerTests
     }
 
     [Fact]
-    public void SampleFixture_ContainsTwoManifestAddDirectives()
+    public void SampleFixture_ContainsThreeManifestAddDirectives()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
         var tokens = Lexer.Tokenize(source);
         var count = tokens.Count(t => t.Type == TokenType.Directive && t.Value == "manifest.add");
-        Assert.Equal(2, count);
+        Assert.Equal(3, count);
     }
 
     [Fact]

@@ -107,8 +107,8 @@ public class EpubWriterTests : IDisposable
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
             [
-                new ManifestItem("item-a", "a.xhtml", "application/xhtml+xml", null, null, "<body/>", false),
-                new ManifestItem("item-b", "b.xhtml", "application/xhtml+xml", null, null, "<body/>", false),
+                new ManifestItem("item-a", "a.xhtml", "application/xhtml+xml", null, null, "<body/>", null, false),
+                new ManifestItem("item-b", "b.xhtml", "application/xhtml+xml", null, null, "<body/>", null, false),
             ]
         );
         Epub.Write(doc, dir, "out.epub");
@@ -124,8 +124,8 @@ public class EpubWriterTests : IDisposable
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
             [
-                new ManifestItem("in-spine",  "a.xhtml", "application/xhtml+xml", null, null, "<body/>", true),
-                new ManifestItem("not-spine", "b.xhtml", "application/xhtml+xml", null, null, "<body/>", false),
+                new ManifestItem("in-spine",  "a.xhtml", "application/xhtml+xml", null, null, "<body/>", null, true),
+                new ManifestItem("not-spine", "b.xhtml", "application/xhtml+xml", null, null, "<body/>", null, false),
             ]
         );
         Epub.Write(doc, dir, "out.epub");
@@ -145,7 +145,7 @@ public class EpubWriterTests : IDisposable
         var dir = TempDir();
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("chap1", "chap1.xhtml", "application/xhtml+xml", null, null, "<body><p>Hello</p></body>", false)]
+            [new ManifestItem("chap1", "chap1.xhtml", "application/xhtml+xml", null, null, "<body><p>Hello</p></body>", null, false)]
         );
         Epub.Write(doc, dir, "out.epub");
         var content = ReadEntry(Path.Combine(dir, "out.epub"), "OEBPS/chap1.xhtml");
@@ -159,7 +159,7 @@ public class EpubWriterTests : IDisposable
         var dir = TempDir();
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("chap1", "chap1.xhtml", "application/xhtml+xml", null, null, "<body><p>Bonjour</p></body>", false)]
+            [new ManifestItem("chap1", "chap1.xhtml", "application/xhtml+xml", null, null, "<body><p>Bonjour</p></body>", null, false)]
         );
         Epub.Write(doc, dir, "out.epub");
         var content = ReadEntry(Path.Combine(dir, "out.epub"), "OEBPS/chap1.xhtml");
@@ -173,7 +173,7 @@ public class EpubWriterTests : IDisposable
         File.WriteAllBytes(Path.Combine(dir, "image.jpg"), [0xFF, 0xD8, 0xFF]);
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("img", "image.jpg", "image/jpeg", null, "image.jpg", null, false)]
+            [new ManifestItem("img", "image.jpg", "image/jpeg", null, "image.jpg", null, null, false)]
         );
         Epub.Write(doc, dir, "out.epub");
         Assert.True(EntryExists(Path.Combine(dir, "out.epub"), "OEBPS/image.jpg"));
@@ -185,7 +185,7 @@ public class EpubWriterTests : IDisposable
         var dir = TempDir();
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("img", "missing.jpg", "image/jpeg", null, "missing.jpg", null, false)]
+            [new ManifestItem("img", "missing.jpg", "image/jpeg", null, "missing.jpg", null, null, false)]
         );
         var ex = Assert.Throws<FileNotFoundException>(() => Epub.Write(doc, dir, "out.epub"));
         Assert.Contains("missing.jpg", ex.Message);
@@ -197,7 +197,7 @@ public class EpubWriterTests : IDisposable
         var dir = TempDir();
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("x", "x.xhtml", "application/xhtml+xml", null, null, null, false)]
+            [new ManifestItem("x", "x.xhtml", "application/xhtml+xml", null, null, null, null, false)]
         );
         Assert.Throws<InvalidOperationException>(() => Epub.Write(doc, dir, "out.epub"));
     }
@@ -211,10 +211,36 @@ public class EpubWriterTests : IDisposable
         File.WriteAllBytes(Path.Combine(dir, "cover.jpg"), [0xFF, 0xD8, 0xFF]);
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("cover-img", "cover.jpg", "image/jpeg", "cover-image", "cover.jpg", null, false)]
+            [new ManifestItem("cover-img", "cover.jpg", "image/jpeg", "cover-image", "cover.jpg", null, null, false)]
         );
         Epub.Write(doc, dir, "out.epub");
         Assert.True(EntryExists(Path.Combine(dir, "out.epub"), "OEBPS/cover.xhtml"));
+    }
+
+    [Fact]
+    public void Write_NavXhtml_UsesNavProperty_WhenAvailable()
+    {
+        var dir = TempDir();
+        var doc = new EpubDocument(
+            new EpubMetadata("1", "T", "fr"),
+            [new ManifestItem("chap1", "chapitre1.xhtml", "application/xhtml+xml", null, null, "<body/>", "Titre Prologue", true)]
+        );
+        Epub.Write(doc, dir, "out.epub");
+        var nav = ReadEntry(Path.Combine(dir, "out.epub"), "OEBPS/nav.xhtml");
+        Assert.Contains(">Titre Prologue</a>", nav);
+    }
+
+    [Fact]
+    public void Write_NavXhtml_UsesId_WhenNavIsNull()
+    {
+        var dir = TempDir();
+        var doc = new EpubDocument(
+            new EpubMetadata("1", "T", "fr"),
+            [new ManifestItem("id-seulement", "chapitre1.xhtml", "application/xhtml+xml", null, null, "<body/>", null, true)]
+        );
+        Epub.Write(doc, dir, "out.epub");
+        var nav = ReadEntry(Path.Combine(dir, "out.epub"), "OEBPS/nav.xhtml");
+        Assert.Contains(">id-seulement</a>", nav);
     }
 
     [Fact]
@@ -223,7 +249,7 @@ public class EpubWriterTests : IDisposable
         var dir = TempDir();
         var doc = new EpubDocument(
             new EpubMetadata("1", "T", "fr"),
-            [new ManifestItem("chap1", "chapitre1.xhtml", "application/xhtml+xml", null, null, "<body/>", true)]
+            [new ManifestItem("chap1", "chapitre1.xhtml", "application/xhtml+xml", null, null, "<body/>", null, true)]
         );
         Epub.Write(doc, dir, "out.epub");
         var nav = ReadEntry(Path.Combine(dir, "out.epub"), "OEBPS/nav.xhtml");
@@ -250,6 +276,7 @@ public class EpubWriterTests : IDisposable
         Assert.True(EntryExists(outPath, "OEBPS/cover.xhtml"));
         Assert.True(EntryExists(outPath, "OEBPS/nav.xhtml"));
         Assert.True(EntryExists(outPath, "OEBPS/cover.jpg"));
+        Assert.True(EntryExists(outPath, "OEBPS/prologue.xhtml"));
         Assert.True(EntryExists(outPath, "OEBPS/chapitre1.xhtml"));
     }
 
