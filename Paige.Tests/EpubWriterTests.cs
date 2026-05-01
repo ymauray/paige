@@ -180,6 +180,18 @@ public class EpubWriterTests : IDisposable
     }
 
     [Fact]
+    public void Write_SourceItem_ThrowsFileNotFound_WhenMissing()
+    {
+        var dir = TempDir();
+        var doc = new EpubDocument(
+            new EpubMetadata("1", "T", "fr"),
+            [new ManifestItem("img", "missing.jpg", "image/jpeg", null, "missing.jpg", null, false)]
+        );
+        var ex = Assert.Throws<FileNotFoundException>(() => Epub.Write(doc, dir, "out.epub"));
+        Assert.Contains("missing.jpg", ex.Message);
+    }
+
+    [Fact]
     public void Write_BothNullSourceAndInlineContent_Throws()
     {
         var dir = TempDir();
