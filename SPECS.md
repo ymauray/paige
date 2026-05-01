@@ -21,7 +21,7 @@ Le `.paige` est le source. L'**EST** est la représentation intermédiaire struc
 
 ## Le format `.paige`
 
-Deux directives pour l'instant :
+Trois directives pour l'instant :
 
 ### `#metadata`
 ```
@@ -47,7 +47,13 @@ Deux directives pour l'instant :
 ]
 ```
 
-Le bloc `[…]` est le corps textuel de l'item (XHTML, Markdown, texte brut, YAML…). S'il est absent, `source` doit pointer vers un fichier existant.
+Le bloc `[…]` est le corps textuel de l'item (XHTML, Markdown, texte brut, YAML…). S'il est présent, il a priorité sur `source`.
+
+### `#include`
+```
+#include "<chemin_relatif>"
+```
+Permet d'inclure le contenu d'un autre fichier `.paige`. Le chemin est résolu relativement au fichier appelant. Les items définis dans le fichier inclus sont ajoutés au manifeste du document parent.
 
 ---
 
@@ -92,6 +98,8 @@ La nav est **générée automatiquement** par `Epub.Write()` à partir de la lis
 
 **TDD strict** : les tests sont écrits avant toute implémentation. Aucune fonction n'est intégrée dans le projet avant d'avoir des tests qui passent. L'ordre systématique pour chaque composant : tests rouges → implémentation → tests verts → intégration.
 
+**CONTRÔLE DES COMMITS (PRIMORDIAL)** : L'agent ne doit **JAMAIS** effectuer de `git commit` de sa propre initiative. Chaque commit doit faire l'objet d'une demande explicite et distincte de l'utilisateur. Les messages de commit doivent impérativement être en français et suivre la norme **Conventional Commits** (ex: `feat:`, `fix:`, `docs:`, `test:`, `chore:`). Cette règle est absolue et prévaut sur toute autre instruction d'automatisation.
+
 ## État d'avancement
 
 | Composant | Fichier | État |
@@ -120,7 +128,7 @@ Le pipeline est complet de bout en bout : `.paige` → Lexer → Parser → EST 
 ### Tests
 
 - `Paige.Tests/LexerTests.cs` — 19 tests (tous verts)
-- `Paige.Tests/ParserTests.cs` — 23 tests (tous verts)
+- `Paige.Tests/ParserTests.cs` — 25 tests (tous verts)
 - `Paige.Tests/EpubWriterTests.cs` — 18 tests (tous verts)
 - `Paige.Tests/Fixtures/sample.paige` — fixture figée utilisée par les tests d'intégration
 

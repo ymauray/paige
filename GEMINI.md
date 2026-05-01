@@ -29,7 +29,7 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 - **`Token.cs`** — `TokenType` enum and `record Token(Type, Value, Line)`.
 - **`Lexer.cs`** — `Lexer.Tokenize(string)` → `Token[]`. Handles all `.paige` token types.
 - **`Est.cs`** — EST records: `EpubDocument`, `EpubMetadata`, `ManifestItem`.
-- **`Parser.cs`** — `Parser.Parse(string)` → `EpubDocument`. Recursive descent, calls the Lexer internally.
+- **`Parser.cs`** — `Parser.Parse(string, basePath)` → `EpubDocument`. Recursive descent, supports `#include` and relative path resolution.
 - **`Epub.cs`** — `static Epub.Write(EpubDocument, basePath, filename)`. Builds an EPUB 3 ZIP archive driven by the EST. Auto-generates `cover.xhtml` (if a `cover-image` item exists) and `nav.xhtml` from spine items.
 - **`Program.cs`** — CLI wrapper using `System.CommandLine`. Finds the `.paige` file in `--project-root`, parses it, calls `Epub.Write()`. Gère proprement les erreurs d'entrée/sortie (dossiers ou fichiers manquants).
 
@@ -38,7 +38,8 @@ Paige is a CLI EPUB 3 generator. The long-term goal is to compile `.paige` files
 `.paige` files (see `mybook.paige`) describe a book declaratively:
 
 ```
-#metadata(identifier: …, title: "…", language: fr)
+#metadata(...)
+#include "chapters.paige"
 
 #manifest.add(id: "…", href: "…", mediaType: "…", spine: true)[
   <head>…</head>
