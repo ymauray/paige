@@ -122,7 +122,7 @@ public static class Epub
             """);
 
         foreach (var item in spineItems)
-            w.WriteLine($"""            <li><a href="{item.Href}">{item.Id}</a></li>""");
+            w.WriteLine($"""            <li><a href="{item.Href}">{item.Nav ?? item.Id}</a></li>""");
 
         w.Write("""
                     </ol>

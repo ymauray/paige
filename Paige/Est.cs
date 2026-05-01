@@ -18,5 +18,6 @@ public record ManifestItem(
     string? Properties,
     string? Source,
     string? InlineContent,
+    string? Nav,
     bool InSpine
 );

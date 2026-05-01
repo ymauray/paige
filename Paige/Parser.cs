@@ -84,7 +84,7 @@ public static class Parser
             Consume(TokenType.LParen);
 
             string? id = null, href = null, mediaType = null;
-            string? properties = null, source = null;
+            string? properties = null, source = null, nav = null;
             bool inSpine = false;
 
             while (Current.Type != TokenType.RParen && Current.Type != TokenType.Eof)
@@ -102,6 +102,7 @@ public static class Parser
                     case "mediaType":  mediaType  = value; break;
                     case "properties": properties = value; break;
                     case "source":     source     = value; break;
+                    case "nav":        nav        = value; break;
                     case "spine":      inSpine    = value == "true"; break;
                 }
             }
@@ -120,7 +121,7 @@ public static class Parser
                 source = null;
             }
 
-            return new ManifestItem(id, href, mediaType, properties, source, inlineContent, inSpine);
+            return new ManifestItem(id, href, mediaType, properties, source, inlineContent, nav, inSpine);
         }
 
         // Consomme Int, String, Bool ou Ident et retourne la valeur textuelle.
