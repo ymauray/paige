@@ -158,6 +158,11 @@ public static class Epub
 
     private static void CopyFile(ZipArchive zip, string entryName, string sourcePath)
     {
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException($"Le fichier source est introuvable : {sourcePath}", sourcePath);
+        }
+
         var entry = zip.CreateEntry(entryName);
         using var entryStream = entry.Open();
         using var sourceStream = File.OpenRead(sourcePath);
