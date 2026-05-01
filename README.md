@@ -93,6 +93,14 @@ dotnet run --project Paige -- --project-root . --output build/mon-livre.epub
 
 ---
 
+## 🧐 Origine du nom
+
+Le nom **Paige** est un hommage à **James W. Paige** et à son invention monumentale, la [Paige Compositor](https://fr.wikipedia.org/wiki/Composeuse_Paige). 
+
+Cette machine à composer, bien que d'une complexité mécanique incroyable (plus de 18 000 pièces), est restée célèbre pour avoir causé la faillite de **Mark Twain**. Là où l'originale était trop complexe pour son propre bien, notre outil **Paige** se veut l'exact opposé : une solution simple, robuste et efficace pour composer vos œuvres numériques. 📚
+
+---
+
 ## 🏗️ Architecture
 
 Paige utilise un pipeline de compilation moderne :
