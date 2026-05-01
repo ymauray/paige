@@ -42,3 +42,5 @@
     <p>Ceci est un EPUB généré manuellement.</p>
 </body>
 ]
+
+#include "part1.paige"

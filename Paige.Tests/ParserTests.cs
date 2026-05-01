@@ -197,7 +197,7 @@ public class ParserTests
     public void SampleFixture_ProducesValidEpubDocument()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
         Assert.NotNull(doc);
     }
 
@@ -205,35 +205,52 @@ public class ParserTests
     public void SampleFixture_Metadata_IsCorrect()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
         Assert.Equal("12345", doc.Metadata.Identifier);
         Assert.Equal("Les Ailéris : Anya", doc.Metadata.Title);
         Assert.Equal("fr", doc.Metadata.Language);
     }
 
     [Fact]
-    public void SampleFixture_Manifest_HasThreeItems()
+    public void SampleFixture_Manifest_HasFourItems()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
-        Assert.Equal(3, doc.Manifest.Count);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
+        Assert.Equal(4, doc.Manifest.Count);
     }
 
     [Fact]
     public void SampleFixture_FirstItem_HasSource()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
         var item = doc.Manifest[0];
         Assert.NotNull(item.Source);
         Assert.Null(item.InlineContent);
     }
 
     [Fact]
+    public void SampleFixture_IncludedItem_IsPresent()
+    {
+        var source = File.ReadAllText(FixturePath("sample.paige"));
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
+        // Item 0: cover-img, Item 1: le-prologue, Item 2: chap1, Item 3: part1-item (from include)
+        Assert.Equal(4, doc.Manifest.Count);
+        Assert.Equal("part1-item", doc.Manifest[3].Id);
+    }
+
+    [Fact]
+    public void Parse_Include_ThrowsFileNotFound_WhenMissing()
+    {
+        var source = "#metadata(identifier: 1, title: \"T\", language: fr)\n#include \"missing.paige\"";
+        Assert.Throws<FileNotFoundException>(() => Parser.Parse(source));
+    }
+
+    [Fact]
     public void SampleFixture_SecondItem_HasInlineContent()
     {
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
         var item = doc.Manifest[1];
         Assert.Null(item.Source);
         Assert.Contains("<body>", item.InlineContent);

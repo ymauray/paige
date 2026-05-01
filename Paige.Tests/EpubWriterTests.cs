@@ -266,7 +266,7 @@ public class EpubWriterTests : IDisposable
         File.WriteAllBytes(Path.Combine(dir, "epub", "cover.jpg"), [0xFF, 0xD8, 0xFF]);
 
         var source = File.ReadAllText(FixturePath("sample.paige"));
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, Path.GetDirectoryName(FixturePath("sample.paige"))!);
         Epub.Write(doc, dir, "out.epub");
 
         var outPath = Path.Combine(dir, "out.epub");
@@ -278,6 +278,7 @@ public class EpubWriterTests : IDisposable
         Assert.True(EntryExists(outPath, "OEBPS/cover.jpg"));
         Assert.True(EntryExists(outPath, "OEBPS/prologue.xhtml"));
         Assert.True(EntryExists(outPath, "OEBPS/chapitre1.xhtml"));
+        Assert.True(EntryExists(outPath, "OEBPS/part1.xhtml"));
     }
 
     private static string FixturePath(string name) =>
