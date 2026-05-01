@@ -1,0 +1,14 @@
+name: paige
+arch: amd64
+platform: linux
+version: ${VERSION}
+maintainer: Yannick Mauray
+description: Un outil pour générer des epubs écrit en .NET 10
+homepage: https://github.com/ymauray/paige
+license: MIT
+
+contents:
+  - src: out/paige
+    dst: /usr/local/bin/paige
+    file_info:
+      mode: 0755
