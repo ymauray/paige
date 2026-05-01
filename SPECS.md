@@ -119,5 +119,14 @@ Le pipeline est complet de bout en bout : `.paige` → Lexer → Parser → EST 
 
 - `Paige.Tests/LexerTests.cs` — 19 tests (tous verts)
 - `Paige.Tests/ParserTests.cs` — 22 tests (tous verts)
-- `Paige.Tests/EpubWriterTests.cs` — 15 tests (tous verts)
+- `Paige.Tests/EpubWriterTests.cs` — 16 tests (tous verts)
 - `Paige.Tests/Fixtures/sample.paige` — fixture figée utilisée par les tests d'intégration
+
+---
+
+## Gestion des erreurs
+
+Le pipeline gère les erreurs courantes de manière propre (sans stack trace) :
+- **Dossier racine absent** : Erreur explicite si le dossier spécifié n'existe pas.
+- **Fichier `.paige` absent** : Erreur si aucun fichier source n'est trouvé.
+- **Fichiers sources manquants** : Si un item du manifest pointe vers un fichier `source` qui n'existe pas, une `FileNotFoundException` est levée et interceptée par le `Program.cs` pour un affichage propre.
