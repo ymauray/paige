@@ -1,0 +1,51 @@
+name: Rapport de bug
+description: Signaler un comportement inattendu
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Merci de prendre le temps de signaler ce bug.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé ?
+      placeholder: En ouvrant un chapitre, l'application se ferme brutalement.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Créer un fichier .paige avec ...
+        2. Lancer la commande : paige --project-root .
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Comportement attendu
+      placeholder: L'archive EPUB devrait être générée sans erreur.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version de Paige
+      placeholder: "v0.1.2"
+    validations:
+      required: true
+
+  - type: input
+    id: appareil
+    attributes:
+      label: Système d'exploitation et version .NET
+      placeholder: macOS Sequoia — .NET 10.0.100
+    validations:
+      required: true
