@@ -13,6 +13,22 @@
 )
 
 #manifest.add(
+    id: "le-prologue",
+    href: "prologue.xhtml",
+    mediaType: "application/xhtml+xml",
+    spine: true,
+    nav: "Prologue",
+)[
+<head>
+    <title>Chapitre 1</title>
+</head>
+<body>
+    <h1>Hello Chapitre 1</h1>
+    <p>La nav doit indiquer "Prologue" et pas "le-prologue"</p>
+</body>
+]
+
+#manifest.add(
     id: "chap1",
     href: "chapitre1.xhtml",
     mediaType: "application/xhtml+xml",

@@ -25,6 +25,7 @@
     mediaType: "application/xhtml+xml",
     source: "epub/title-page.xhtml",
     spine: true,
+    nav: "Titre"
 )
 
 #manifest.add(
@@ -32,6 +33,7 @@
     href: "chapitre1.xhtml",
     mediaType: "application/xhtml+xml",
     spine: true,
+    nav: "Prologue",
 )[
 <head>
     <title>Chapitre 1</title>
