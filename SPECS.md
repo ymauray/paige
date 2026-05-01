@@ -40,6 +40,7 @@ Deux directives pour l'instant :
     mediaType: <string>,
     properties: <string>,   // optionnel
     source: <string>,       // optionnel — fichier source à copier dans l'EPUB
+    nav: <string>,          // optionnel — texte à afficher dans la table des matières
     spine: <bool>           // optionnel — false par défaut
 )[
   <!-- contenu XHTML inline, optionnel -->
@@ -71,6 +72,7 @@ record ManifestItem(
     string? Properties,   // ex: "cover-image", "nav"
     string? Source,       // chemin vers un fichier externe à copier
     string? InlineContent,// contenu XHTML brut (bloc [...])
+    string? Nav,          // label pour la navigation
     bool InSpine
 );
 ```
@@ -118,8 +120,8 @@ Le pipeline est complet de bout en bout : `.paige` → Lexer → Parser → EST 
 ### Tests
 
 - `Paige.Tests/LexerTests.cs` — 19 tests (tous verts)
-- `Paige.Tests/ParserTests.cs` — 22 tests (tous verts)
-- `Paige.Tests/EpubWriterTests.cs` — 16 tests (tous verts)
+- `Paige.Tests/ParserTests.cs` — 23 tests (tous verts)
+- `Paige.Tests/EpubWriterTests.cs` — 18 tests (tous verts)
 - `Paige.Tests/Fixtures/sample.paige` — fixture figée utilisée par les tests d'intégration
 
 ---
