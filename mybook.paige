@@ -13,6 +13,13 @@
 )
 
 #manifest.add(
+    id: "ab-logo",
+    href: "logo.svg",
+    mediaType: "image/svg+xml",
+    source: "epub/logo.svg"
+)
+
+#manifest.add(
     id: "title-page",
     href: "title-page.xhtml",
     mediaType: "application/xhtml+xml",
