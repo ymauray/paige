@@ -33,7 +33,7 @@ rootCommand.SetAction(result =>
         }
 
         var source = File.ReadAllText(paigeFiles[0]);
-        var doc = Parser.Parse(source);
+        var doc = Parser.Parse(source, fullPath);
 
         Epub.Write(doc, fullPath, "mybook.epub");
         Console.WriteLine($"EPUB généré : {Path.Combine(fullPath, "mybook.epub")}");

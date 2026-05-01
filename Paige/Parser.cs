@@ -2,13 +2,13 @@ namespace Paige;
 
 public static class Parser
 {
-    public static EpubDocument Parse(string source)
+    public static EpubDocument Parse(string source, string basePath = ".")
     {
         var tokens = Lexer.Tokenize(source);
-        return new ParserState(tokens).ParseDocument();
+        return new ParserState(tokens, basePath).ParseDocument();
     }
 
-    private sealed class ParserState(Token[] tokens)
+    private sealed class ParserState(Token[] tokens, string basePath)
     {
         private int _pos;
 
@@ -30,17 +30,61 @@ public static class Parser
             while (Current.Type != TokenType.Eof)
             {
                 if (Current.Type == TokenType.Directive && Current.Value == "metadata")
+                {
                     metadata = ParseMetadata();
+                }
                 else if (Current.Type == TokenType.Directive && Current.Value == "manifest.add")
+                {
                     manifest.Add(ParseManifestItem());
+                }
+                else if (Current.Type == TokenType.Directive && Current.Value == "include")
+                {
+                    manifest.AddRange(ParseInclude());
+                }
                 else
+                {
                     Consume();
+                }
             }
 
             if (metadata is null)
                 throw new InvalidOperationException("Directive #metadata manquante.");
 
             return new EpubDocument(metadata, manifest);
+        }
+
+        private List<ManifestItem> ParseInclude()
+        {
+            Consume(TokenType.Directive); // "include"
+            var includePath = Consume(TokenType.String).Value;
+            var fullIncludePath = Path.Combine(basePath, includePath);
+
+            if (!File.Exists(fullIncludePath))
+                throw new FileNotFoundException($"Le fichier inclus est introuvable : {fullIncludePath}", fullIncludePath);
+
+            var includedSource = File.ReadAllText(fullIncludePath);
+            var includedBasePath = Path.GetDirectoryName(fullIncludePath) ?? ".";
+            
+            var tokens = Lexer.Tokenize(includedSource);
+            var subState = new ParserState(tokens, includedBasePath);
+            
+            var items = new List<ManifestItem>();
+            while (subState.Current.Type != TokenType.Eof)
+            {
+                if (subState.Current.Type == TokenType.Directive && subState.Current.Value == "manifest.add")
+                {
+                    items.Add(subState.ParseManifestItem());
+                }
+                else if (subState.Current.Type == TokenType.Directive && subState.Current.Value == "include")
+                {
+                    items.AddRange(subState.ParseInclude());
+                }
+                else
+                {
+                    subState.Consume();
+                }
+            }
+            return items;
         }
 
         private EpubMetadata ParseMetadata()
