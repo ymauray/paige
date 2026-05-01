@@ -4,9 +4,8 @@ namespace Paige;
 
 public static class Epub
 {
-    public static void Write(EpubDocument doc, string basePath, string filename)
+    public static void Write(EpubDocument doc, string basePath, string outputPath)
     {
-        var outputPath = Path.Combine(basePath, filename);
         using var stream = new FileStream(outputPath, FileMode.Create);
         using var zip = new ZipArchive(stream, ZipArchiveMode.Create);
 
