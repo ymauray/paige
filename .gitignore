@@ -53,3 +53,4 @@ epub/
 
 *.epub
 *.paige
+!Paige.Tests/Fixtures/*.paige
