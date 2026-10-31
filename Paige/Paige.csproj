@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="3.0.0-rc.2.26504.105" />
+    <PackageReference Include="System.CommandLine" Version="3.0.0-rc.3.26522.148" />
   </ItemGroup>
 
 </Project>
